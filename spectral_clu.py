@@ -94,7 +94,7 @@ def mindist(array, centroid, k):
             min_dist = dist
     return min_dist
 
-def evaluate(list1,list2,cluster_num):
+def confusion_matrix(list1,list2,cluster_num):
     list3 =[[0 for col in range(3)]
                for row in range(3)]
     for i in range(cluster_num):
@@ -277,7 +277,7 @@ print (end - start)
 print ('no. of iterations of while loop')
 print (count) 
 # evaluation
-list_10 = evaluate(cluster_list,y,3)
+list_10 = confusion_matrix(cluster_list,y,3)
 print(list_10)  
 list10 = np.matrix(list_10)
 
