@@ -26,6 +26,8 @@ def myComb(a,b):
 
 vComb = np.vectorize(myComb)
 
+# --- rand index evaluation
+
 def get_tp_fp_tn_fn(cooccurrence_matrix):
   tp_plus_fp = vComb(cooccurrence_matrix.sum(0, dtype=int),2).sum()
   tp_plus_fn = vComb(cooccurrence_matrix.sum(1, dtype=int),2).sum()
@@ -36,18 +38,15 @@ def get_tp_fp_tn_fn(cooccurrence_matrix):
 
   return [tp, fp, tn, fn]
 
-
-
-
-
-
 maxfloat = float('inf')
 iris = datasets.load_iris()
 X = iris.data[:, :2]
 y = iris.target
-print(len(y))
+#print(len(y))
 # final cluster plot made using 3 clusters
-print(y)
+#print(y)
+
+
 def euclidean(vector1, vector2):
 
     dist = [(a - b) ** 2 for (a, b) in zip(vector1, vector2)]
@@ -86,6 +85,7 @@ def centroid(
     return res_list
 
 # finds min distance between a point and centroid
+
 def mindist(array, centroid, k):
     min_dist = maxfloat
     for i in range(k):
@@ -108,35 +108,22 @@ def evaluate(list1,list2,cluster_num):
     return list3
                
 
-
-
-
-
-    	
-	
-
-
 sigma = 1000
 
+# multi_list0 - contains datapoints
 
-
-
-# multi_list10 - contains datapoints
-# multi_list2 - contains centroids for respective clusters
-# cluster_list - contains datapoints withrespect to each cluster
-
-rownum = 150#int(input('Input number of datapoints: '))  # n
+rownum = 150  # n
 colnum = 2  # d
 clusternum = 3  # k
 
-multi_list10 = [[float(random.uniform(1, 1000)) for col in
+multi_list0 = [[float(random.uniform(1, 1000)) for col in
                range(colnum)] for row in range(rownum)]  # contains points
-multi_list10 = X
+multi_list0 = X
 
 # adjacency matrix(A)
+
 ad_list = [[float(0) for col in range(rownum)] for row in
                range(rownum)]
-
 
 # weights
 
@@ -144,15 +131,11 @@ for row in range(rownum):
 
     for col in range(rownum):
        
-        ad_list[row][col] = math.exp(-1*euclidean(multi_list10[row],multi_list10[col])*euclidean(multi_list10[row],multi_list10[col])/(2*sigma*sigma))
-
-#print(ad_list)
-
-
-
+        ad_list[row][col] = math.exp(-1*euclidean(multi_list0[row],multi_list0[col])*euclidean(multi_list0[row],multi_list0[col])/(2*sigma*sigma))
 
 
 #degree matrix -- diagonal matrix(D)
+
 degree_list = [[float(0) for col in
                range(rownum)] for row in range(rownum)] 
 
@@ -174,27 +157,27 @@ for row in range(rownum):
     for col in range(rownum):
        
         laplacian_list[row][col] = degree_list[row][col] - ad_list[row][col]
-'''
-print("lapla")
-print(laplacian_list)
-'''
-eigenValues,v = LA.eig(laplacian_list)
+
+eigenValues,eigenvec = LA.eig(laplacian_list)
+
+# -- eigen values are sorted into descending order
 
 idx = eigenValues.argsort()[::-1]   
 eigenValues = eigenValues[idx]
-v= v[:,idx]
+eigenvec= eigenvec[:,idx]
 
+#--contains first k eigen vectors
 
 f_list = [[float(random.uniform(1, 1000)) for col in
-               range(clusternum)] for row in range(rownum)]  # contains points
+               range(clusternum)] for row in range(rownum)]  
 
 for row in range(rownum):
     for col in range(clusternum):
-        f_list[row][col] =v[row][rownum-1-col]
+        f_list[row][col] =eigenvec[row][rownum-1-col]
 
 # ------------------ kmeans
 
-# multi_list1 - contains datapoints
+# multi_list1 - contains datapoints on which kmeans will be applied
 # multi_list2 - contains centroids for respective clusters
 # cluster_list - contains datapoints withrespect to each cluster
 
@@ -212,8 +195,8 @@ multi_list1 = f_list
 multi_list = [[float(0) for col in
                range(col_num)] for row in range(cluster_num)]  # contains points
 
-list_1 = [multi_list10[i][0] for i in range(row_num)]
-list_2 = [multi_list10[i][1] for i in range(row_num)]
+list_1 = [multi_list0[i][0] for i in range(row_num)]
+list_2 = [multi_list0[i][1] for i in range(row_num)]
 #print("multi_list1")
 #print(multi_list1)
 
@@ -234,30 +217,7 @@ for row in range(cluster_num):
 print (multi_list2)
 '''
 plt.figure(figsize = (10,5))
-plt.subplot(161)  
-plt.title('initialized centroids')
-plt.xlabel('Sepal Length', fontsize=16)
-plt.ylabel('Sepal Width', fontsize=16)
-#list_3 = [multi_list2[i][0] for i in range(cluster_num)]
-#list_4 = [multi_list2[i][1] for i in range(cluster_num)]
-plt.ylim(1.5,5) 
-plt.xlim(4,8.5)   
-#plt.scatter(list_3, list_4, label= "stars", color= "blue",  
-            #marker= "*", s = 100)
 
-
-
-
-plt.subplot(162)
-plt.title('datapoints')
-plt.scatter(list_1, list_2,label = "stars", color= "orange",  
-            marker= "o")
-#list_3 = [multi_list2[i][0] for i in range(cluster_num)]
-#list_4 = [multi_list2[i][1] for i in range(cluster_num)]
-plt.ylim(1.5,5) 
-plt.xlim(4,8.5)    
-#plt.scatter(list_3, list_4, label= "stars", color= "blue",  
-            #marker= "*", s = 100)
 
 
 
@@ -319,66 +279,41 @@ print (count)
 # evaluation
 list_10 = evaluate(cluster_list,y,3)
 print(list_10)  
-list10 = np.matrix([[7, 50, 50], [3, 0, 0], [40, 0, 0]])
+list10 = np.matrix(list_10)
 
 
 list_0 =get_tp_fp_tn_fn(list10)
-print(get_tp_fp_tn_fn(list10))
+
 sum_ = ((list_0)[0] +list_0[2])/(sum(list_0))
-print("purity")
+print("rand_index")
 print(sum_)
-
-
-plt.subplot(163)
-plt.title('iteration - 1 ')
-plt.scatter(list_1, list_2,label = "stars", color= "orange",  
-            marker= "o")
-#list_5 = [multi_list[i][0] for i in range(cluster_num)]
-#list_6 = [multi_list[i][1] for i in range(cluster_num)]
-plt.ylim(1.5,5) 
-plt.xlim(4,8.5)     
-#plt.scatter(list_5, list_6, label= "stars", color= "blue",  
-            #marker= "*", s = 100) 
-
-
-plt.subplot(164)  
-plt.title('iteration - 2 ')
-plt.scatter(list_1, list_2,label = "stars", color= "orange",  
-            marker= "o")
-#list_7 = [multi_list4[i][0] for i in range(cluster_num)]
-#list_8 = [multi_list4[i][1] for i in range(cluster_num)]
-plt.ylim(1.5,5) 
-plt.xlim(4,8.5)   
-#plt.scatter(list_7, list_8, label= "stars", color= "blue",  
-         # marker= "*", s = 100)    
 
 list1 =  [0 for i in range(len(cluster_list[0]))] 
 list2 =  [0 for i in range(len(cluster_list[0]))]  
 
 for j in range(len(cluster_list[0])):
-         list1[j] = multi_list10[cluster_list[0][j]][0]
-         list2[j] = multi_list10[cluster_list[0][j]][1]
-print(list1)
-print(list2)
+         list1[j] = multi_list0[cluster_list[0][j]][0]
+         list2[j] = multi_list0[cluster_list[0][j]][1]
+
 list3 = [0 for i in range(len(cluster_list[1]))]
 list4 = [0 for i in range(len(cluster_list[1]))]
 for j in range(len(cluster_list[1])):
-         list3[j] = multi_list10[cluster_list[1][j]][0]
-         list4[j] = multi_list10[cluster_list[1][j]][1]     
+         list3[j] = multi_list0[cluster_list[1][j]][0]
+         list4[j] = multi_list0[cluster_list[1][j]][1]     
 
 list5 =  [0 for i in range(len(cluster_list[2]))] 
 list6 =  [0 for i in range(len(cluster_list[2]))]   
 
 for j in range(len(cluster_list[2])):
-         list5[j] = multi_list10[cluster_list[2][j]][0]
-         list6[j] = multi_list10[cluster_list[2][j]][1]  
+         list5[j] = multi_list0[cluster_list[2][j]][0]
+         list6[j] = multi_list0[cluster_list[2][j]][1]  
 
 #list7 = [multi_list2[i][0] for i in range(cluster_num)]
 #list8 = [multi_list2[i][1] for i in range(cluster_num)]
 
 
 
-plt.subplot(165)
+plt.subplot(121)
 plt.title('final clusters - predicted')
 
 
@@ -399,7 +334,7 @@ plt.scatter(list5, list6, label= "stars", color= "black",
 #plt.scatter(list7, list8, label= "stars", color= "brown",  
 #  marker= "*", s = 100)
 
-plt.subplot(166)
+plt.subplot(122)
 plt.title('actual')
 plt.scatter(X[:,0], X[:,1], c=y, cmap='gist_rainbow')
 
